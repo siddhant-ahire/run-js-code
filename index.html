@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA with Siddhant</title>
+  <link rel="stylesheet" href="monaco-editor/min/vs/editor/editor.main.css">
+  <script src="https://unpkg.com/monaco-editor/min/vs/loader.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <style>
+    /* Smooth transition for the sidebar and icons */
+    #sidebar {
+      transition: all 0.3s ease;
+    }
+
+    /* Hide labels in collapsed mode */
+    #sidebar.collapsed .sidebar-label {
+      display: none;
+    }
+
+    /* Center the icons in collapsed mode */
+    #sidebar.collapsed .sidebar-item {
+      justify-content: center;
+    }
+
+    /* Shrink sidebar width when collapsed */
+    #sidebar.collapsed {
+      width: 4rem;
+    }
+
+    /* Expand sidebar to full width */
+    #sidebar.expanded {
+      width: 18rem;
+    }
+
+    /* Hide children items by default */
+    .child-menu {
+      display: none;
+      margin-left: 2rem;
+    }
+
+    /* Show children items when parent is active */
+    .parent-active .child-menu {
+      display: block;
+    }
+
+    /* Add transition effect for child menu items */
+    .child-menu {
+      transition: all 0.3s ease;
+    }
+
+    /* Style for console output */
+    #editorOutput {
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100">
+
+  <div class="flex h-screen">
+    <!-- Main Content -->
+    <div id="contentArea" class="flex-grow p-10">
+      <!-- Include essential content here -->
+      <div id="dynamicContent">
+        <p>Please select a section from the sidebar.</p>
+      </div>
+      <div id="code_editor" class="flex flex-row mt-5">
+        <div id="editorContainer" class="basis-1" style="height: 500px; min-width: 60%;"></div>
+        <button id="runCode" class="bg-gray-500 text-white basis-1/6 hover:bg-gray-700">Run Code</button>
+        <div id="editorOutput" class="p-5 bg-gray-200 basis-1/2 wx-auto text-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initializeMonacoEditor(htmlContent) {
+      require.config({ paths: { 'vs': 'monaco-editor/min/vs' }});
+      require(['vs/editor/editor.main'], function() {
+        const editor = monaco.editor.create(document.getElementById('editorContainer'), {
+          value: htmlContent,
+          language: 'javascript',
+          theme: 'vs-dark',
+          automaticLayout: true
+        });
+  
+        document.getElementById('runCode').addEventListener('click', () => {
+          const code = editor.getValue();
+          const outputDiv = document.getElementById('editorOutput');
+  
+          const originalConsole = { ...console };
+          const output = [];
+  
+          function logToOutput(...args) {
+            output.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' '));
+            outputDiv.innerHTML = output.join('<br/>');
+          }
+  
+          console.log = (...args) => logToOutput('>', ...args);
+          console.error = (...args) => logToOutput('ERROR:', ...args);
+          console.warn = (...args) => logToOutput('WARN:', ...args);
+          console.info = (...args) => logToOutput('INFO:', ...args);
+  
+          try {
+            outputDiv.innerHTML = '';
+            const result = eval(code);
+  
+            if (result !== undefined) {
+              outputDiv.innerHTML += `<br/><strong>Result:</strong> ${result}`;
+            }
+          } catch (error) {
+            outputDiv.innerHTML += `<br/><strong>Error:</strong> ${error.message}`;
+          }
+  
+          console.log = originalConsole.log;
+          console.error = originalConsole.error;
+          console.warn = originalConsole.warn;
+          console.info = originalConsole.info;
+        });
+      });
+    }
+  
+    window.onload = function() {
+        initializeMonacoEditor("console.log('Hello Siddhant')");
+    };
+  </script>
+  
+
+</body>
+
+</html>
